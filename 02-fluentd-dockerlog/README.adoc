@@ -1,0 +1,50 @@
+= fluentdを使うだけ
+
+* ポイント
+----
+...
+  app:
+...
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "127.0.0.1:24224"
+        tag: "docker.{{.ImageName}}.{{.Name}}.{{.ID}}"
+...
+----
+
+* LogPathの確認
++
+----
+$ docker-compsoe up -d
+$ docker inspect $(docker-compose ps -q app) | grep -A 3 Log
+        "LogPath": "",
+        "Name": "/02-fluentd-dockerlog_app_1",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+--
+            "LogConfig": {
+                "Type": "fluentd",
+                "Config": {
+                    "fluentd-address": "127.0.0.1:24224",
+----
+* LogPathが空文字を確認
+* LogConfigのTypeがfluentdということも確認可能
+
+==== logを見てみる
+
+----
+$ docker-compsoe up -d
+$ ls -lh log/
+total 48K
+-rwxrwxrwx 1 999 docker 42K  8月 31 23:25 docker.b5916a7c0619c73f6edec23f64164bb9d.log
+-rwxrwxrwx 1 999 docker  74  8月 31 23:25 docker.b5916a7c0619c73f6edec23f64164bb9d.log.meta
+lrwxrwxrwx 1 999 docker  57  8月 31 23:23 docker.log -> /fluentd/log/docker.b5916a7c0619c73f6edec23f64164bb9d.log
+----
+
+==== b59168ecb68c324a6e0d0647feefc8da0とは何か?
+* my-digdagのコンテナID? -> NO
+* my-fluentdのコンテナID? -> NO
+* docker inspectでコンテナの情報にgrepで引っかかるか試した -> 無し
+* 何かしらのハッシュ値?
+* 謎
