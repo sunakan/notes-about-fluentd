@@ -1,0 +1,52 @@
+= fluentdを使わない時のlog
+
+* inspectしてLogPath見るとわかる
++
+----
+$ docker inspect $(docker-compose ps -q app) | grep -A 3 Log
+        "LogPath": "/var/lib/docker/containers/6300506929bdf585c1ea0033247cef440ec8fa3ec800174d62fb41e064361bf2/6300506929bdf585c1ea0033247cef440ec8fa3ec800174d62fb41e064361bf2-json.log",
+        "Name": "/01-non-fluent-dockerlog_app_1",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+--
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+----
+
+==== 見てみる
+
+----
+$ docker-compse up -d
+$ sudo tail -f /var/lib/docker/containers/$(docker-compose ps -q app)/$(docker-compose ps -q app)-json.log
+{"log":"\u001b[0;39mWarning: Nashorn engine is planned to be removed from a future JDK release\r\n","stream":"stdout","time":"2019-08-31T11:52:02.259059554Z"}
+{"log":"\u001b[32m2019-08-31 20:52:18 +0900 [INFO] (0038@[0:default]+sample+step01): sh\u003e: mkdir -p ./tmp \\\r\n","stream":"stdout","time":"2019-08-31T11:52:18.750989877Z"}
+{"log":"\u0026\u0026 bash ./date.sh | tee ./tmp/tee-result\r\n","stream":"stdout","time":"2019-08-31T11:52:18.751012567Z"}
+{"log":"\r\n","stream":"stdout","time":"2019-08-31T11:52:18.751016181Z"}
+{"log":"\u001b[0;39m====20190831-20h52m18s\r\n","stream":"stdout","time":"2019-08-31T11:52:18.785018405Z"}
+{"log":"[INFO ] 20190831-20h52m20s\r\n","stream":"stdout","time":"2019-08-31T11:52:20.792833658Z"}
+{"log":"[ERROR] 20190831-20h52m21s\r\n","stream":"stdout","time":"2019-08-31T11:52:21.800405547Z"}
+{"log":"[INFO ] 20190831-20h52m22s\r\n","stream":"stdout","time":"2019-08-31T11:52:22.809946684Z"}
+{"log":"[ERROR] 20190831-20h52m23s\r\n","stream":"stdout","time":"2019-08-31T11:52:23.816413522Z"}
+{"log":"[INFO ] 20190831-20h52m24s\r\n","stream":"stdout","time":"2019-08-31T11:52:24.887471198Z"}
+...
+----
+
+* ERRORの方は標準エラー出力で出してるが、多分digdagの出力なのでstreamはstdout扱い
+* teeで拾うとちゃんとERRORは取得できないことを確認
++
+----
+$ tail -f tmp/tee-result
+[INFO ] 20190831-20h57m24s
+[INFO ] 20190831-20h57m26s
+====20190831-20h58m08s
+[INFO ] 20190831-20h58m10s
+[INFO ] 20190831-20h58m12s
+[INFO ] 20190831-20h58m14s
+====20190831-20h59m07s
+[INFO ] 20190831-20h59m09s
+[INFO ] 20190831-20h59m11s
+[INFO ] 20190831-20h59m13s
+...
+----
