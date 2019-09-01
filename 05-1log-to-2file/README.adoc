@@ -1,0 +1,50 @@
+= 普通にlogを吐きつつ、ERRORだけのlogファイルも出す
+
+* もちろんERROR logは普通のlogファイルにも吐かれる
+* 言い換えると、1つのlogを2つのlogファイルに吐く
+* もっと言い換えると
+** link:https://papix.hatenablog.com/entry/2014/11/05/185449[fluentdで1つのsourceを複数回処理したい時はcopyを使いましょう]
+** link:https://kazuhira-r.hatenablog.com/entry/2019/05/26/200508[Fluentdでログを読み込み、ログレベルがWARN以上ならメールを送るようにしてみる]
+** link:https://qiita.com/sonots/items/a01d2233210b7b059967[Fluentd v0.12 ラベル機能の使い方とプラグインの改修方法]
+
+==== ポイント
+
+* copyでstoreを複数にして扱う
+* Label機能を使うとTagをrewriteしなくて良さそう
+
+* relabelでうまくいったことを確認
++
+----
+<source>
+  @type  forward
+  @id    input1
+  @label @raw
+  port  24224
+</source>
+
+<filter **>
+  @type stdout
+</filter>
+
+<label @raw>
+  <match **>
+    @type copy
+    <store>
+      @type relabel
+      @label @mainstream
+    </store>
+    <store>
+      @type relabel
+      @label @handle.error
+    </store>
+  </match>
+</label>
+
+<label @mainstream>
+...
+</label>
+
+<label @handle.error>
+...
+</label>
+----

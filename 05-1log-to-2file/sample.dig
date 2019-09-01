@@ -1,0 +1,9 @@
+timezone: Asia/Tokyo
+
+schedule:
+  minutes_interval>: 1
+
++step01:
+  sh>: |
+    mkdir -p ./tmp \
+    && bash ./date.sh | tee -a ./tmp/tee-result
