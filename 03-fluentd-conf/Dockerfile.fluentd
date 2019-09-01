@@ -1,0 +1,1 @@
+FROM fluent/fluentd:v1.7-debian-1

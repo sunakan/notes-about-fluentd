@@ -1,0 +1,30 @@
+= fluentd.conf
+
+* time_slice_format
+** %Y%m%d
+** logファイル出力時のファイルフォーマット
+** 基本%Y%m%d??
+** hour毎にやったら管理が大変そう
+
+* time_format
+** ファイルに記載される時間のフォーマット
+*** デフォルトフォーマット：2019-09-01T22:23:04+09:00
+** %Y%m%dT%H%M%S%z
+*** 2019-09-01T02:02:41+09:00
+
+* append
+** true：logファイル出力時に追記（フォーマット毎に1つにまとめる）
+** false：logファイルを連番でチャンクを別々のファイルに書き出す（並列処理に便利）
++
+----
+log/
+├ docker.20190901_0.log
+├ docker.20190901_1.log
+├ docker.b5916d9eee6529c055752c55218ab1ba0.log
+├ docker.b5916d9eee6529c055752c55218ab1ba0.log.meta
+----
+
+==== メモ
+
+* 謎だったdocker.XXXXXX.logのXXX部分は、time_slice_formatのハッシュ値か何かかもしれない
+** 根拠：time_slice_formatを変更すると変わったから
