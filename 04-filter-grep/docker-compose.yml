@@ -1,0 +1,36 @@
+---
+
+version: "3.7"
+
+services:
+  app:
+    command: ["bash", "-c", "digdag scheduler"]
+    tty: true
+    working_dir: /app
+    image: my-digdag
+    build:
+      context: .
+      dockerfile: Dockerfile.digdag
+    volumes:
+      - .:/app
+    environment:
+      TZ: Asia/Tokyo
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "127.0.0.1:24224"
+        tag: "docker.{{.ImageName}}.{{.Name}}.{{.ID}}"
+    links:
+      - fluentd
+  fluentd:
+    image: my-fluentd
+    build:
+      context: .
+      dockerfile: Dockerfile.fluentd
+    volumes:
+      - ./log:/fluentd/log
+      - ./fluent.conf:/fluentd/etc/fluent.conf:ro
+    ports:
+      - 24224:24224
+    environment:
+      TZ: Asia/Tokyo

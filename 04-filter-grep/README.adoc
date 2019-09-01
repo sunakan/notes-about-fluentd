@@ -1,0 +1,34 @@
+= filterでERRORだけ抽出する
+
+* link:https://docs.fluentd.org/filter/grep[]
+
+==== <filter XXX.**>
+
+----
+<filter docker.**>
+  @type grep
+  <regexp>
+    key log
+    pattern /ERROR/
+  </regexp>
+</filter>
+----
+
+
+* key: "log"の値に "ERROR" という文字がフィルタされてるのが確認可能
+----
+$ tail -f log/docker.20190901.log
+2019-09-01T12:39:25+09:00       docker.my-digdag.04-filter-grep_app_1.dd708802ba2e      {"container_name":"/04-filter-grep_app_1","source":"stdout","log":"[ERROR] 20190901-12h39m25s\r","container_id":"dd708802ba2e48aad9c349e36a8293ea8027af
+e0b4887b6e5a76639b17053e74"}
+2019-09-01T12:39:27+09:00       docker.my-digdag.04-filter-grep_app_1.dd708802ba2e      {"container_name":"/04-filter-grep_app_1","source":"stdout","log":"[ERROR] 20190901-12h39m27s\r","container_id":"dd708802ba2e48aad9c349e36a8293ea8027af
+e0b4887b6e5a76639b17053e74"}
+2019-09-01T12:40:12+09:00       docker.my-digdag.04-filter-grep_app_1.dd708802ba2e      {"log":"[ERROR] 20190901-12h40m12s\r","container_id":"dd708802ba2e48aad9c349e36a8293ea8027afe0b4887b6e5a76639b17053e74","container_name":"/04-filter-gr
+ep_app_1","source":"stdout"}
+...
+----
+
+==== 気づき
+
+* 一時的にdocker.b59175bce12d90efbfeb3d55b26844a63.logと*.metaがなくなる
+** time_slice_waitなどでチャンクが出力された時、docker.b591*.logの中身がなくなったら、一時的に消える
+** またERRORを引っ掛けてlogが出てきたらdocker.b591*.logが復活する
