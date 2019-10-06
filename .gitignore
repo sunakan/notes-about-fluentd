@@ -27,3 +27,4 @@ tags
 .digdag/
 log/
 tmp/
+.env
