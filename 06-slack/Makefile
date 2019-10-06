@@ -13,3 +13,9 @@ up: clean setup
 
 down: setup
 	docker-compose down
+
+config:
+	docker-compose config
+
+docker-log:
+	docker inspect `docker-compose ps -q app` | jq --unbuffered -r ".[0].LogPath" | xargs sudo cat

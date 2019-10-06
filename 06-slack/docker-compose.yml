@@ -4,17 +4,14 @@ version: "3.7"
 
 services:
   app:
-    command: ["bash", "-c", "digdag scheduler"]
-    tty: true
+    command: ["./sample.sh"]
     working_dir: /app
-    image: my-digdag
-    build:
-      context: .
-      dockerfile: Dockerfile.digdag
+    image: debian:buster-slim
     volumes:
       - .:/app
     environment:
       TZ: Asia/Tokyo
+    tty: false
     logging:
       driver: fluentd
       options:
@@ -34,3 +31,4 @@ services:
       - 24224:24224
     environment:
       TZ: Asia/Tokyo
+      SLACK_URL: $SLACK_URL
